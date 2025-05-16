@@ -21,7 +21,15 @@ app.get('/', (req, res) => {
 
 //changed GET route (dynamically generate HTML strings)
 app.get('/', (req, res) => {
-  let todoListHTML = todos.map(task => `<li>${task}</li>`).join('');
+  let todoListHTML = todos.map((task, index) => `
+    <li>
+      ${task}
+      <form action="/delete" method="POST" style="display:inline;">
+        <input type="hidden" name="index" value="${index}">
+        <button type="submit">削除</button>
+      </form>
+    </li>
+  `).join('');
 
   const html = `
     <!DOCTYPE html>
@@ -47,12 +55,21 @@ app.get('/', (req, res) => {
 });
 
 
+
 //POST ROUTE
 app.post('/add', (req, res) => {
   const task = req.body.task;
   console.log('受け取ったToDo:', task);
   if (task) {
     todos.push(task);
+  }
+  res.redirect('/');
+});
+
+app.post('/delete', (req, res) => {
+  const index = req.body.index;
+  if (index != undefined && todos[index]) {
+    todos.splice(index, 1); //delete only one post
   }
   res.redirect('/');
 });
